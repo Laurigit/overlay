@@ -1,0 +1,2 @@
+#STAT_VOITTOENNUSTE
+load("../common_data/STAT_VOITTOENNUSTE.RData")
