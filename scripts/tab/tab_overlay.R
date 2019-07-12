@@ -1,15 +1,15 @@
 required_data("STG_PELISTATSIT")
+rPeli <- reactiveValues(id = NA)
+required_data("ADM_CURRENT_TURN")
+turnData <- reactiveValues(turn = 0, data = ADM_CURRENT_TURN)
+required_data("ADM_CURRENT_DMG")
+damagedata <- reactiveValues(data = ADM_CURRENT_DMG)
 
 life_totals <- reactive({
-  required_data("ADM_CURRENT_DMG")
-  res <- calc_life_totals(ADM_CURRENT_DMG, 20)
+  res <- calc_life_totals(damagedata$data, 20)
   res
 })
 
-eR_Peli_ID <- reactive({
-  required_data("ADM_TEMP_DATA_STORAGE")
-  peli_ID <- ADM_TEMP_DATA_STORAGE[muuttuja == "Peli_ID", arvo]
-})
 
 output$overlay_sarjataulukko <- renderDataTable({
   required_data(c("STG_PELISTATSIT", "STG_PAKAT"))
@@ -18,7 +18,7 @@ output$overlay_sarjataulukko <- renderDataTable({
   Data <-  UID_SARJATAULUKKO(FALSE, STG_PELISTATSIT, STG_PAKAT)
   # print(eR_UID_SARJATAULUKKO())
 
-  peli_ID_temp <- eR_Peli_ID()
+  peli_ID_temp <- rPeli$id
   peliDivari <- STG_PELISTATSIT[Peli_ID == peli_ID_temp, max(Divari)]
 
   DivariData <- Data[[peliDivari]]
@@ -81,6 +81,7 @@ observe({
                globalenv()
                )
     fileUpdates$temp <- temp
+    rPeli$id <- ADM_TEMP_DATA_STORAGE[muuttuja == "Peli_ID", arvo]
   }
 
   if (pelistats != fileUpdates$pelistats) {
@@ -97,6 +98,7 @@ observe({
                globalenv()
     )
     fileUpdates$dmg <- dmg
+    damagedata$data <- ADM_CURRENT_DMG
   }
 
   if (turn != fileUpdates$turn) {
@@ -105,6 +107,9 @@ observe({
                globalenv()
     )
     fileUpdates$turn <- turn
+
+    turnData$data <- ADM_CURRENT_TURN
+    print(turnData$data)
   }
 
 
@@ -112,14 +117,15 @@ observe({
 
 
 output$overlay_left_col <- renderUI({
-  required_data(c("ADM_TURN_SEQ", "ADM_CURRENT_TURN"))
-      curr_turn <- ADM_CURRENT_TURN[, max(TSID)]
+  required_data(c("ADM_TURN_SEQ"))
+  print("OVERLAY LEFT COL UPDATED")
+      curr_turn <- turnData$data[, max(TSID)]
  # if (input$vasen == "Lauri") {
 
     lifetVasen <- life_totals()$Lifetotal[Omistaja_NM == "Lauri", Life_total]
 
 
-        aloittaja <- getAloittaja(STG_PELISTATSIT, eR_Peli_ID())
+        aloittaja <- getAloittaja(STG_PELISTATSIT, rPeli$id)
 
     if ( curr_turn > 0) {
       vuorotekstiAlku <- ADM_TURN_SEQ[TSID == curr_turn, Turn_text]
@@ -196,8 +202,8 @@ output$overlay_left_col <- renderUI({
 
 output$valueBoxRows <- renderUI({
   required_data("ADM_TURN_SEQ")
-  if (nrow(ADM_CURRENT_DMG) > 0 ) {
-  accpetd_dmg_row_all <- calc_life_totals(ADM_CURRENT_DMG)$aggr_accepted
+  if (nrow(damagedata$data) > 0 ) {
+  accpetd_dmg_row_all <- calc_life_totals(damagedata$data)$aggr_accepted
   accpetd_dmg_row <- accpetd_dmg_row_all[nrow(accpetd_dmg_row_all)]
   colori <- ifelse(accpetd_dmg_row[, Amount] > 0, "maroon", "green")
   ikoni <- ifelse(accpetd_dmg_row[, Combat_dmg] == 1, "hand-rock", "bolt")
@@ -212,18 +218,18 @@ output$valueBoxRows <- renderUI({
     teksti <-  paste0(soursa, " -> ", targetti)
   }
   } else {
-    teksti <- "Not started"
+    teksti <- "-"
     vuoro <- 0
     ikoni <- "stop"
     colori <- "black"
     maara <- ""
-    subTitle <- "Not started"
+    subTitle <- ""
   }
 
-
+  aloittaja <- getAloittaja(STG_PELISTATSIT, rPeli$id)
   if ( vuoro > 0) {
     vuorotekstiAlku <- ADM_TURN_SEQ[TSID == vuoro, Turn_text]
-    if (isolate(eR_Peli_Aloittaja$a) == 0) {
+    if (aloittaja$Aloittaja_ID == "L") {
       Aloittaja <- "L"
       Nostaja <- "M"
     } else {
@@ -254,9 +260,9 @@ output$valueBoxRows <- renderUI({
 output$valueBoxRows_prev <- renderUI({
 
   required_data("ADM_TURN_SEQ")
-  required_data("ADM_CURRENT_DMG")
-  if(nrow(ADM_CURRENT_DMG) > 0) {
-  accpetd_dmg_row_all <- calc_life_totals(ADM_CURRENT_DMG)$aggr_accepted
+
+  if(nrow(damagedata$data) > 2) {
+  accpetd_dmg_row_all <- calc_life_totals(damagedata$data)$aggr_accepted
   accpetd_dmg_row <- accpetd_dmg_row_all[nrow(accpetd_dmg_row_all) - 1]
   colori <- ifelse(accpetd_dmg_row[, Amount] > 0, "maroon", "green")
   ikoni <- ifelse(accpetd_dmg_row[, Combat_dmg] == 1, "hand-rock", "bolt")
@@ -271,18 +277,19 @@ output$valueBoxRows_prev <- renderUI({
     teksti <-  paste0(soursa, " -> ", targetti)
   }
   } else {
-  teksti <- "No dmg"
+  teksti <- "-"
   colori <- "black"
   ikoni <- "stop"
   vuoro <- 0
   maara <- ""
-  subTitle <- "Not started"
+  subTitle <- ""
 }
 
 
   if ( vuoro > 0) {
     vuorotekstiAlku <- ADM_TURN_SEQ[TSID == vuoro, Turn_text]
-    if (isolate(eR_Peli_Aloittaja$a) == 0) {
+    aloittaja <- getAloittaja(STG_PELISTATSIT, rPeli$id)
+    if (aloittaja$Aloittaja_ID == "L") {
       Aloittaja <- "L"
       Nostaja <- "M"
     } else {
@@ -387,8 +394,8 @@ output$overlay_right_col <- renderUI({
 })
 
 output$PakkaLeftBox_overlay <- renderUI({
-  if (!is.na(eR_Peli_ID())) {
-    result <- getDeckStats("Lauri", UID_UUSI_PELI, eR_Peli_ID())
+  if (!is.na(rPeli$id)) {
+    result <- getDeckStats("Lauri", UID_UUSI_PELI, rPeli$id)
     result_data <- result$data
     #  print("output$PakkaLeftBox")
 
@@ -435,10 +442,10 @@ output$PakkaLeftBox_overlay <- renderUI({
 output$PakkaRightBox_overlay <- renderUI({
   #luo riippuvuus
 
-  if (!is.na(eR_Peli_ID())) {
+  if (!is.na(rPeli$id)) {
     # browser()
     ############
-    result <- getDeckStats("Martti", UID_UUSI_PELI, eR_Peli_ID())
+    result <- getDeckStats("Martti", UID_UUSI_PELI, rPeli$id)
     result_data <- result$data
 
     box(
@@ -491,12 +498,12 @@ output$PakkaVSBox_overlay <- renderUI({
   #required_data("UID_UUSI_PELI", TRUE)
   #rm(eR_UID_UUSI_PELI)
 
-  if (!is.na(eR_Peli_ID())) {
+  if (!is.na(rPeli$id)) {
     #luo riippuvuus
 
     ############
     #eR_UID_UUSI_PELI <- required_reactive("UID_UUSI_PELI", "eR_UID_UUSI_PELI")
-    result <- getVSStatsHtml(UID_UUSI_PELI, "Lauri", eR_Peli_ID())
+    result <- getVSStatsHtml(UID_UUSI_PELI, "Lauri", rPeli$id)
     result_data <- result$data
     #box(HTML(result), background = "aqua", width = NULL, align = "middle")
     box(
