@@ -48,7 +48,9 @@ output$overlay_sarjataulukko <- renderDataTable({
 
 
 output$turnaustilanne_overlay <- renderValueBox({
-
+#take dep
+  print(fileUpdates$pelistats)
+  ###
   sarjataulukkoData <-   UID_SARJATAULUKKO(FALSE, STG_PELISTATSIT, STG_PAKAT)
   total <- do.call(rbind, sarjataulukkoData)
   Lvoitot <- total[Omistaja_ID == "L", sum(Score)]
@@ -86,10 +88,10 @@ observe({
 
   if (pelistats != fileUpdates$pelistats) {
     required_data("ADM_DI_HIERARKIA")
-    updateData("STG_PELISTATSIT", ADM_DI_HIERARKIA,
+    updateData("SRC_PELISTATSIT", ADM_DI_HIERARKIA,
                globalenv()
     )
-    fileUpdates$temp <- temp
+    fileUpdates$pelistats <- pelistats
   }
 
   if (dmg != fileUpdates$dmg) {
@@ -176,26 +178,6 @@ output$overlay_left_col <- renderUI({
     fluidRow(uiOutput("PakkaVSBox_overlay")))
 
 
-  #  column(2,
-  #         valueBox(input$laurin_mulligan, subtitle = "Mulls", color = "maroon", width = NULL))
-
-    #  plotOutput("EV_plot_ovelary"),
-    #  uiOutput("PakkaRightBox_overlay")
-      # ,
-      # box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
-      #                 lifetOikea,
-      #                 '</b></font></div>')),
-      #     background = "blue",
-      #     width = "100%")
-
-
-
-
-               # column(3, box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
-               #                           pakkaVasen,
-               #                           '</b></font></div>')),
-               #               background = "maroon",
-               #               width = "100%")),
 
   })
 
