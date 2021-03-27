@@ -8,9 +8,9 @@ uusi_peli <- dashboardBody(
 
   useShinyalert(),
   useShinyjs(),
-  extendShinyjs(text = jscode),
+ # extendShinyjs(text = jscode),
 
-  extendShinyjs(text = "shinyjs.hidehead = function(parm){
+  extendShinyjs(functions = c("hidehead"), text = "shinyjs.hidehead = function(parm){
                                     $('header').css('display', parm);
                                 }"),
 
@@ -50,7 +50,7 @@ sidebar <- dashboardSidebar(
               # menuItem("Uusi peli", tabName = "tab_uusi_peli", icon = icon("gamepad")),
               # menuItem("Tallenna peli", icon = icon("hdd"), tabName = "tab_tallenna_peli"),
               # menuItem("LifeCounter", tabName = "tab_LifeCounter", icon = icon("gamepad")),
-              menuItem("Overlay", icon = icon("server"), tabName = "tab_overlay"),
+            menuItem("Overlay", icon = icon("server"), tabName = "tab_overlay"),
 
               # actionButton("automated_tests", label = h5("Run tests")),
              actionButton("refresh", label = "Update data"),

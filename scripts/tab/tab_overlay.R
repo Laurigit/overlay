@@ -19,6 +19,9 @@ output$overlay_sarjataulukko <- renderDataTable({
   # print(eR_UID_SARJATAULUKKO())
 
   peli_ID_temp <- rPeli$id
+  if(is.na(peli_ID_temp)) {
+    peli_ID_temp <- STG_PELISTATSIT[, max(Peli_ID)]
+  }
   peliDivari <- STG_PELISTATSIT[Peli_ID == peli_ID_temp, max(Divari)]
 
   DivariData <- Data[[peliDivari]]
