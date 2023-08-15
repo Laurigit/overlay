@@ -197,7 +197,7 @@ output$valueBoxRows <- renderUI({
   maara <- abs(accpetd_dmg_row[, Amount])
   vuoro <- accpetd_dmg_row[, TSID]
   #suunta riippuen damagen vastaanottajasta
-  if (targetti == "Lauri") {
+  if (targetti == "L") {
     teksti <- paste0(targetti, " <- ", soursa)
   } else {
     teksti <-  paste0(soursa, " -> ", targetti)
@@ -256,7 +256,7 @@ output$valueBoxRows_prev <- renderUI({
   maara <- abs(accpetd_dmg_row[, Amount])
   vuoro <- accpetd_dmg_row[, TSID]
   #suunta riippuen damagen vastaanottajasta
-  if (targetti == "Lauri") {
+  if (targetti == "L") {
     teksti <- paste0(targetti, " <- ", soursa)
   } else {
     teksti <-  paste0(soursa, " -> ", targetti)

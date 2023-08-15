@@ -47,7 +47,10 @@ shinyServer(function(input, output, session) {
 if (session$user == "overlay") {
 js$hidehead('none')
 shinyjs::addClass(selector = "body", class = "sidebar-collapse")
-updateTabItems(session,"sidebarmenu", "tab_overlay")
+#PALAUTA MINUT
+#updateTabItems(session,"sidebarmenu", "tab_overlay")
+###########
+updateTabItems(session,"sidebarmenu", "tab_overlay_prellut")
 }
 
 
@@ -58,7 +61,6 @@ updateTabItems(session,"sidebarmenu", "tab_overlay")
   sourcelist[, kansio := ifelse(str_sub(kansio, -2, -1) == ".R", "root", kansio)]
 
   input_kansio_list <- c(
-
                          "tab",
                          "root"
                          )

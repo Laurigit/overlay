@@ -36,7 +36,12 @@ uusi_peli <- dashboardBody(
   #  source("./scripts/ui/ui_uusi_peli.R",local = TRUE)$value,
   #  source("./scripts/ui/ui_tallenna_peli.R",local = TRUE)$value,
   # source("./scripts/ui/ui_life_counter.R",local = TRUE)$value,
-  source("./scripts/ui/ui_overlay.R",local = TRUE)$value
+
+    #PALAUTA MINUT
+    #etsi kaikki PALAUTA MINUT ctrl+f
+  #   source("./scripts/ui/ui_overlay.R",local = TRUE)$value
+    ####
+    source("./scripts/ui/ui_overlay_prellut.R",local = TRUE)$value
 
 
 
@@ -50,7 +55,14 @@ sidebar <- dashboardSidebar(
               # menuItem("Uusi peli", tabName = "tab_uusi_peli", icon = icon("gamepad")),
               # menuItem("Tallenna peli", icon = icon("hdd"), tabName = "tab_tallenna_peli"),
               # menuItem("LifeCounter", tabName = "tab_LifeCounter", icon = icon("gamepad")),
-            menuItem("Overlay", icon = icon("server"), tabName = "tab_overlay"),
+
+
+              #PALAUTA MINUT
+           # menuItem("Overlay", icon = icon("server"), tabName = "tab_overlay"),
+                ################
+
+            menuItem("Overlay", icon = icon("server"), tabName = "tab_overlay_prellut"),
+
 
               # actionButton("automated_tests", label = h5("Run tests")),
              actionButton("refresh", label = "Update data"),
