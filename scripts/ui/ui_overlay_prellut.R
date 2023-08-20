@@ -8,5 +8,6 @@ tabItem(tabName = "tab_overlay_prellut",
 
                   column(2, offset = 8, uiOutput("overlay_right_col"))
 
-            )
+            ),
+          fluidRow(column(5, offset = 4, div(dataTableOutput("sarjataulukko")), style = "font-size:400%"))
 ))
