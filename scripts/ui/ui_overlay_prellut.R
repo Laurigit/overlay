@@ -2,11 +2,11 @@
 tabItem(tabName = "tab_overlay_prellut",
         fluidPage(
           fluidRow(
-            column(2,
-                   fluidRow(uiOutput("overlay_left_col")
-                            )),
-            column(2, offset = 8,
-                   fluidRow(   uiOutput("overlay_right_col"))
+            tags$head(tags$style(HTML(".small-box {height: 94px}"))),
+                  column(2, uiOutput("overlay_left_col"))
+                            ,
 
-            )))
-)
+                  column(2, offset = 8, uiOutput("overlay_right_col"))
+
+            )
+))

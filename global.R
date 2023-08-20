@@ -20,6 +20,7 @@ if (!dir.exists("./dmg_turn_files/")) {
 
 
 #library(config)
+library(RMySQL)
 library(shinyWidgets)
 library(shiny)
 library(shinydashboard)
@@ -101,6 +102,6 @@ for(input_kansio in input_kansio_list) {
   }
 }
 
-
+con <- connDB(con)
 
 print("Global.R valmis")

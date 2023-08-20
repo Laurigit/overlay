@@ -154,6 +154,8 @@ output$overlay_left_col <- renderUI({
       vuoroTeksti <- "Not started"
     }
 
+#star-half-stroke
+
 
 
  # }
@@ -162,7 +164,7 @@ output$overlay_left_col <- renderUI({
 
       box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
                                           lifetVasen,
-                                          '</b></font></div>')),
+                                          '</b></font></div><i class="fa fa-trophy" role="presentation" aria-label="trophy icon"></i> ')),
                               background = "blue",
                               width = NULL)
       ),

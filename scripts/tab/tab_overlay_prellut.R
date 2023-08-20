@@ -86,9 +86,9 @@ output$overlay_left_col <- renderUI({
     vuorotekstiAlku <- ADM_TURN_SEQ[TSID == curr_turn, Turn_text]
     if (aloittaja$Aloittaja_ID == "L") {
       Aloittaja <- "L"
-      Nostaja <- "M"
+      Nostaja <- "R"
     } else {
-      Aloittaja <- "M"
+      Aloittaja <- "R"
       Nostaja <- "L"
     }
 
@@ -99,33 +99,42 @@ output$overlay_left_col <- renderUI({
     }
 
 
-    vuoroTeksti <- paste0(pelaaja_vuorossa, " ", vuorotekstiAlku)
+    vuoroTeksti <- paste0("Turn ", pelaaja_vuorossa, " ", vuorotekstiAlku)
   } else {
     vuoroTeksti <- "Not started"
   }
-
+  #star-half-stroke
 
 
   # }
   fluidPage(
-    fluidRow(
 
-      box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
-                      lifetVasen,
+
+      fluidRow( box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+                      '(', matchup_tilanne_react$vasen, ') ', lifetVasen,
                       '</b></font></div>')),
           background = "blue",
-          width = NULL)
-    ),
+          width = NULL)),
+
+      fluidRow(uiOutput("vasen_pelaaja_custom")),
 
 
-    fluidRow(
 
-      box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+      fluidRow(box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
                       vuoroTeksti,
                       '</b></font></div>')),
-          background = "blue",
-          width = NULL)
-    ),
+          background = "navy",
+          width = NULL)),
+
+               fluidRow(uiOutput("matchuptimer"))
+      # fluidRow(box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+      #                           aika_text_reactive$aika,
+      #                           '</b></font></div>')),
+      #               background = "navy",
+      #               width = NULL))
+      #
+
+
 )
 
 
@@ -182,11 +191,12 @@ output$valueBoxRows <- renderUI({
   }
 
 
-  box(valueBox(value = tags$p(paste0("   ", teksti, " ", maara), style = "font-size: 125%;"),
+  valueBox(value = tags$p(paste0("   ", teksti, " ", maara), style = "font-size: 125%;"),
                subtitle = tags$p(subTitle, style = "font-size: 125%;"),
-               icon = icon(ikoni),
+
+           icon = icon(ikoni),
                color = colori,
-               width = NULL), width = NULL)
+               width = NULL)
 
 })
 
@@ -243,11 +253,11 @@ output$valueBoxRows_prev <- renderUI({
   }
 
 
-  box(valueBox(value = tags$p(paste0("   ", teksti, " ", maara), style = "font-size: 125%;"),
+  valueBox(value = tags$p(paste0("   ", teksti, " ", maara), style = "font-size: 125%;"),
                subtitle = tags$p(subTitle, style = "font-size: 125%;"),
                icon = icon(ikoni),
                color = colori,
-               width = NULL), width = NULL)
+               width = NULL)
 
 })
 
@@ -282,24 +292,20 @@ output$overlay_right_col <- renderUI({
 
   # }
   fluidPage(
-    fluidRow(
 
-      box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
-                      lifetOikea,
-                      '</b></font></div>')),
-          background = "blue",
-          width = NULL)
-    ),
-    fluidRow(
-      box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
-                      aika_text_reactive$aika,
-                      '</b></font></div>')),
-          background = "blue",
-          width = NULL)),
+fluidRow(
+  fluidRow(box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+                           lifetOikea, ' (', matchup_tilanne_react$oikea, ')',
+                           '</b></font></div>')),
+               background = "blue",
+               width = NULL)),
+      fluidRow(uiOutput("oikea_pelaaja_custom")),
+      fluidRow(uiOutput("valueBoxRows")),
+      fluidRow(uiOutput("valueBoxRows_prev"))
 
-    uiOutput("valueBoxRows"),
-    uiOutput("valueBoxRows_prev")
-  )
+
+  ))
+
 
   #  column(2,
   #         valueBox(input$laurin_mulligan, subtitle = "Mulls", color = "maroon", width = NULL))
@@ -324,4 +330,186 @@ output$overlay_right_col <- renderUI({
 
 })
 
+#tab_custom_tournament
+
+
+
+
+
+
+# output$matchup_text <- renderText({
+#
+#   seuraava_peli <-   STG_CUSTOM_TOURNAMENT$data[is.na(voittaja), min(game_id)]
+#   seuraava_peli_rivi <- STG_CUSTOM_TOURNAMENT$data[game_id == seuraava_peli]
+#   boksiteksti <- paste0(seuraava_peli_rivi[, vasen], "-", seuraava_peli_rivi[, oikea])
+#   # box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+#   #                 boksiteksti,
+#   #                                              '</b></font></div>')),
+#   #                                  background = "blue",
+#   #                                  width = NULL)
+#
+#   boksiteksti
+# })
+
+matchup_tilanne_react <- reactiveValues(vasen = 0, oikea = 0)
+observe({
+  seuraava_peli <-   STG_CUSTOM_TOURNAMENT$data[is.na(voittaja), min(game_id)]
+  nykyinen_match_up <- STG_CUSTOM_TOURNAMENT$data[game_id == seuraava_peli, match_id]
+  matchup_data <- STG_CUSTOM_TOURNAMENT$data[match_id == nykyinen_match_up]
+  vas_name <- matchup_data[, .N, by = vasen][, vasen]
+  oik_name <- matchup_data[, .N, by = oikea][, oikea]
+  vas_voitot <- matchup_data[voittaja == -1, .N]
+  oik_voitot <- matchup_data[voittaja == 1, .N]
+  tasurit <- matchup_data[voittaja == 0, .N] / 2
+  boksiteksti <- paste0(vas_voitot + tasurit, "-", oik_voitot + tasurit)
+  matchup_tilanne_react$vasen <- vas_voitot + tasurit
+  matchup_tilanne_react$oikea <- oik_voitot + tasurit
+})
+
+
+
+output$matchup_tilanne <- renderUI({
+
+  seuraava_peli <-   STG_CUSTOM_TOURNAMENT$data[is.na(voittaja), min(game_id)]
+  nykyinen_match_up <- STG_CUSTOM_TOURNAMENT$data[game_id == seuraava_peli, match_id]
+  matchup_data <- STG_CUSTOM_TOURNAMENT$data[match_id == nykyinen_match_up]
+  vas_name <- matchup_data[, .N, by = vasen][, vasen]
+  oik_name <- matchup_data[, .N, by = oikea][, oikea]
+  vas_voitot <- matchup_data[voittaja == -1, .N]
+  oik_voitot <- matchup_data[voittaja == 1, .N]
+  tasurit <- matchup_data[voittaja == 0, .N] / 2
+  boksiteksti <- paste0(vas_voitot + tasurit, "-", oik_voitot + tasurit)
+
+  box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+                  boksiteksti,
+                  '</b></font></div>')),
+      background = "purple",
+      width = NULL)
+
+
+
+})
+
+
+
+sarjataulukko <- reactive({
+
+
+  if (nrow(STG_CUSTOM_TOURNAMENT$data) > 1) {
+
+    aggr_over_bo3_raw <- copy(STG_CUSTOM_TOURNAMENT$data)[!is.na(voittaja), .(pelatut_pelit = .N, sum_voitot = sum(voittaja)), by = .(vasen, oikea, match_id)]
+    aggr_over_bo3_raw[, BO_voittaja := ifelse(sum_voitot < 0, -1,
+                                              ifelse(sum_voitot > 0, 1, 0))]
+    aggr_over_bo3_raw[, is_completed := ifelse((abs(sum_voitot) == 2 & pelatut_pelit == 2) |  pelatut_pelit == 3, 1, 0)]
+    aggr_over_bo3 <- aggr_over_bo3_raw[is_completed == TRUE]
+    vasurivoitot <- aggr_over_bo3[BO_voittaja == -1, .(Wins = .N), by = .(Player = vasen)]
+    oikee_voitot <- aggr_over_bo3[BO_voittaja == 1, .(Wins = .N), by = .(Player = oikea)]
+    tasurit <-  aggr_over_bo3[BO_voittaja == 0, .(Draw = .N), by = .(Player = oikea)]
+    tasurit_vasen <-  aggr_over_bo3[BO_voittaja == 0, .(Draw = .N), by = .(Player = vasen)]
+    vasuritappio <- aggr_over_bo3[BO_voittaja == 1, .(Lost = .N), by = .(Player = vasen)]
+    oikee_tappio <- aggr_over_bo3[BO_voittaja == -1, .(Lost = .N), by = .(Player = oikea)]
+    bindwin <- rbind(vasurivoitot, oikee_voitot)[, .(type = "Wins", sum = sum(Wins)), by = Player]
+    bindlost <- rbind(vasuritappio, oikee_tappio)[, .(type = "Lost", sum = sum(Lost)), by = Player]
+    binddraw <- rbind(tasurit, tasurit_vasen)[, .(type = "Draw", sum = sum(Draw)), by = Player]
+    tasuridummy <- data.table(Player = "Tasuri", type = "Draw", sum = 1)
+    bindall <- rbind(bindwin, bindlost, binddraw, tasuridummy)
+    dcasti <- dcast.data.table(bindall, Player ~ type, fun.aggregate = sum, value.var = "sum")
+    dcasti[is.na(dcasti)] <- 0
+    remove_dummy <- dcasti[Player != "Tasuri", .(Player, Score = Wins * 3 + Draw, Wins, Lost, Draw, Stats = paste0(Wins, "-", Lost, "-", Draw))][order(-Score)]
+    remove_dummy
+  }
+})
+
+
+
+
+
+
+
+output$vasen_pelaaja_custom <- renderUI({
+  seuraava_peli <-   STG_CUSTOM_TOURNAMENT$data[is.na(voittaja), min(game_id)]
+  nykyinen_match_up <- STG_CUSTOM_TOURNAMENT$data[game_id == seuraava_peli, match_id]
+  matchup_data <- STG_CUSTOM_TOURNAMENT$data[match_id == nykyinen_match_up]
+  vas_name <- matchup_data[, .N, by = vasen][, vasen]
+
+  vas_stats <- sarjataulukko()[Player == vas_name, Stats]
+
+
+  boksiteksti <- paste0(vas_name, " ", vas_stats)
+
+  box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+                  boksiteksti,
+                  '</b></font></div>')),
+      background = "purple",
+      width = NULL)
+
+})
+output$oikea_pelaaja_custom <- renderUI({
+  seuraava_peli <-   STG_CUSTOM_TOURNAMENT$data[is.na(voittaja), min(game_id)]
+  nykyinen_match_up <- STG_CUSTOM_TOURNAMENT$data[game_id == seuraava_peli, match_id]
+  matchup_data <- STG_CUSTOM_TOURNAMENT$data[match_id == nykyinen_match_up]
+  oik_name <- matchup_data[, .N, by = oikea][, oikea]
+
+  oik_stats <- sarjataulukko()[Player == oik_name, Stats]
+
+
+  boksiteksti <- paste0(oik_name, " ", oik_stats)
+
+  box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+                  boksiteksti,
+                  '</b></font></div>')),
+      background = "purple",
+      width = NULL)
+
+})
+output$matchuptimer <- renderUI({
+  invalidateLater(1000, session)
+  seuraava_peli <-   STG_CUSTOM_TOURNAMENT$data[is.na(voittaja), min(game_id)]
+  nykyinen_match_up <- STG_CUSTOM_TOURNAMENT$data[game_id == seuraava_peli, match_id]
+  matchup_data <- STG_CUSTOM_TOURNAMENT$data[match_id == nykyinen_match_up]
+
+  if ((matchup_data[nth_game_of_match == 1, timestamp] != "")) {
+    matchup_alku <-   matchup_data[nth_game_of_match == 1, as.POSIXct(timestamp, tz = "EET")]
+    aikaNyt <- now(tz = "EET")
+    sekunnit_yht <- as.integer(difftime(aikaNyt, matchup_alku, units = c("secs")))
+    minuutit_yht <- floor(sekunnit_yht / 60)
+    sekunnit <- sekunnit_yht - 60 * minuutit_yht
+    tunnit <- floor(minuutit_yht / 60)
+    minuutit <- minuutit_yht - 60 * tunnit
+    sekunnit_fix <- str_pad(sekunnit, 2, pad = "0")
+    minuutit_fix <- str_pad(minuutit, 2, pad = "0")
+    tunnit_text <- ifelse(tunnit > 0,
+                          paste0(str_pad(tunnit, 2, pad = "0"),":"),
+                          "")
+    mu_teksti <- paste0(tunnit_text, minuutit_fix,":",sekunnit_fix)
+  } else {
+    mu_teksti <- "Not started"
+  }
+
+
+
+  box(HTML(paste0('<div align="center"><font size="7" color="white"> <b>',
+                  mu_teksti,
+                  '</b></font></div>')),
+      background = "navy",
+      width = NULL)
+
+})
+
+output$sarjataulukko <- renderDataTable({
+  #DEPENDENCY
+  input$tallenna_tulos_voittaja
+  ########################
+  sarjataulukko()[, .(Player, Score, Stats)]
+
+}, options = list(
+  searching = FALSE,
+  #scrollY = "400px",
+  scrollX = FALSE,
+  lengthChange = FALSE,
+  paging = FALSE,
+  bInfo =  FALSE
+),
+rownames = FALSE
+)
 

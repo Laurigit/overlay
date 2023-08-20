@@ -16,7 +16,14 @@ shinyServer(function(input, output, session) {
 
 
 
+  paivittyva_custom_tournament <- my_reactivePoll(session, "CUSTOM_TOURNAMENT", "SELECT * FROM CUSTOM_TOURNAMENT", 2500, con)
 
+  STG_CUSTOM_TOURNAMENT <- reactiveValues(data = data.table(dbSelectAll("CUSTOM_TOURNAMENT", con)))
+  observe({
+
+    STG_CUSTOM_TOURNAMENT$data <- paivittyva_custom_tournament()
+
+  })
 
 
 
