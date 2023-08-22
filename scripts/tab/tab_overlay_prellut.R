@@ -1,6 +1,6 @@
 #tab_overlay_prellut
 
-required_data("STG_PELISTATSIT")
+#required_data("STG_PELISTATSIT")
 rPeli <- reactiveValues(id = NA)
 required_data("ADM_CURRENT_TURN")
 turnData <- reactiveValues(turn = 0, data = ADM_CURRENT_TURN)
@@ -80,7 +80,7 @@ output$overlay_left_col <- renderUI({
   lifetVasen <- life_totals()$Lifetotal[Omistaja_NM == "Lauri", Life_total]
 
 
-  aloittaja <- getAloittaja(STG_PELISTATSIT, rPeli$id)
+  aloittaja <- getAloittaja(STG_PELISTATSIT$data, rPeli$id)
 
   if ( curr_turn > 0) {
     vuorotekstiAlku <- ADM_TURN_SEQ[TSID == curr_turn, Turn_text]
@@ -169,7 +169,7 @@ output$valueBoxRows <- renderUI({
     subTitle <- ""
   }
 
-  aloittaja <- getAloittaja(STG_PELISTATSIT, rPeli$id)
+  aloittaja <- getAloittaja(STG_PELISTATSIT$data, rPeli$id)
   if ( vuoro > 0) {
     vuorotekstiAlku <- ADM_TURN_SEQ[TSID == vuoro, Turn_text]
     if (aloittaja$Aloittaja_ID == "L") {
@@ -233,7 +233,7 @@ output$valueBoxRows_prev <- renderUI({
 
   if ( vuoro > 0) {
     vuorotekstiAlku <- ADM_TURN_SEQ[TSID == vuoro, Turn_text]
-    aloittaja <- getAloittaja(STG_PELISTATSIT, rPeli$id)
+    aloittaja <- getAloittaja(STG_PELISTATSIT$data, rPeli$id)
     if (aloittaja$Aloittaja_ID == "L") {
       Aloittaja <- "L"
       Nostaja <- "R"

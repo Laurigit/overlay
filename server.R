@@ -25,6 +25,13 @@ shinyServer(function(input, output, session) {
 
   })
 
+  paivittyva_statsi <- my_reactivePoll(session, "UID_UUSI_PELI", "SELECT * FROM UID_UUSI_PELI", 2500, con)
+
+  STG_PELISTATSIT <- reactiveValues(data = data.table(dbSelectAll("UID_UUSI_PELI", con)))
+  observe({
+    STG_PELISTATSIT$data <- paivittyva_statsi()
+
+  })
 
 
 
